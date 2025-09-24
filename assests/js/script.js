@@ -1,5 +1,5 @@
-var productList = JSON.parse(localStorage.getItem("productList")) || [];
-document.addEventListener("DOMContentLoaded", () => {
+let productList = JSON.parse(localStorage.getItem("productList")) || [];
+let cartList = JSON.parse(localStorage.getItem("cartList")) || [];
 
 if(productList.length == 0){
     productList = [
@@ -194,7 +194,7 @@ if(productList.length == 0){
     localStorage.setItem("productList", JSON.stringify(productList));
     
 }
-showProduct(productList);
+
 function showProduct(productList){
     let section;
     document.getElementById("womens-tab").innerHTML = "";
@@ -202,10 +202,7 @@ function showProduct(productList){
     document.getElementById("kids-tab").innerHTML = "";
     document.getElementById("shoes-tab").innerHTML = "";
     document.getElementById("accesories-tab").innerHTML = "";
-    productList.forEach(p => {
-    console.log("Rendering:", p.name, "Category:", p.category);
-        "hello"
-    });
+  
     productList.forEach(p => {
         if(p.category === "Women"){
             section = document.getElementById("womens-tab");
@@ -226,17 +223,17 @@ function showProduct(productList){
                 <p>${p.description}</p>
                 <p>${p.price} Rs.</p>
                 <div class="product-btn d-flex gap-2 w-100 justify-content-center">
-                    <button class="cart-btn" id="cart-btn">Add to Cart</button>
+                    <button class="cart-btn" onclick="addToCart(${p.id})">Add to Cart</button>
                     <button class="view-btn" id="view-btn">View Product</button>
                 </div>
             </div>
         `
     });
 }
-})
+
 function addNewItem(){
   let itemName = document.getElementById("item-name").value.trim();
-  let id = parseInt(document.getElementById("item-id").value.trim());
+  let id = parseInt(document.getElementById("item-id").value.trim(), 10);
   let category = document.getElementById("category").value.trim();
   let price = parseFloat(document.getElementById("price").value.trim());
   let stock = parseInt(document.getElementById("stock").value.trim());
@@ -245,6 +242,12 @@ function addNewItem(){
 
   if(!itemName || !category || !price || !stock || !des || !image){
     alert("Please fill all information.");
+    return;
+  }
+
+  let exists = productList.some(p => parseInt(p.id, 10) === id);
+  if (exists) {
+    alert("Item ID already exists! Please choose a unique ID.");
     return;
   }
 
@@ -298,7 +301,7 @@ function renderItemTable(productList) {
 function deleteItem(id) {
   if (!confirm("Are you sure you want to delete this item?")) return;
 
-  productList = productList.filter(p => p.id !== id);
+  productList = productList.filter(p => parseInt(p.id, 10) !== parseInt(id, 10));
   localStorage.setItem("productList", JSON.stringify(productList));
 
   renderItemTable(productList);
@@ -349,117 +352,114 @@ function updateItem(id) {
   btn.onclick = addNewItem;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderItemTable(productList);
-});
+function addToCart(productId) {
+  
+  let cartList = JSON.parse(localStorage.getItem("cartList")) || [];
+  let existing = cartList.find(item => item.id === productId);
 
-let cartList = JSON.parse(localStorage.getItem("cartList")) || [];
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    let product = productList.find(p => p.id === productId);
+    if (!product) return;
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderCart();
-});
+    cartList.push({
+      id: product.id,
+      qty: 1
+    });
+  }
 
-// Render cart items
+  localStorage.setItem("cartList", JSON.stringify(cartList));
+
+  alert("Item added to cart.");
+}
+
 function renderCart() {
-  let cartSection = document.querySelector(".cart");
-  cartSection.innerHTML = "";
+  let cartSection = document.getElementById("cart");
+  let subTotalSection = document.getElementById("subTotal");
 
-  if (cartList.length === 0) {
-    cartSection.innerHTML = `<h3 class="text-center mt-5">Your cart is empty 🛒</h3>`;
+  if (!cartSection) {
+    console.log("cartsection not found");
     return;
   }
 
-  let rows = cartList
-    .map((item) => {
-      let product = productList.find((p) => p.id === item.id);
-      if (!product) return "";
+  cartSection.innerHTML = "";
+  subTotalSection.innerHTML = "";
 
-      return `
-      <div class="card mb-3 shadow-sm">
-        <div class="row g-0 align-items-center">
-          <!-- Product Image -->
-          <div class="col-md-3">
-            <img src="${product.image}" class="img-fluid rounded-start" alt="${product.name}">
-          </div>
-          <!-- Product Details -->
-          <div class="col-md-6">
-            <div class="card-body">
-              <h5 class="card-title">${product.name}</h5>
-              <p class="card-text text-muted">${product.category}</p>
-              <p class="card-text fw-bold">₹${product.price}</p>
-              <!-- Quantity -->
-              <div class="d-flex align-items-center">
-                <button class="btn btn-outline-secondary btn-sm me-2" onclick="updateQuantity(${product.id}, -1)">-</button>
-                <input type="text" class="form-control text-center" value="${item.qty}" style="width: 60px;" readonly>
-                <button class="btn btn-outline-secondary btn-sm ms-2" onclick="updateQuantity(${product.id}, 1)">+</button>
-              </div>
+  if (cartList.length === 0) {
+    cartSection.innerHTML = `<h2 class="mt-5 fw-light letter-spacing-1">Your cart is empty</h2>`;
+    return;
+  }
+
+  let subtotal = 0;
+
+  cartList.forEach(item => {
+    
+    let product = productList.find(p => p.id === item.id);
+    if (!product) return;
+
+    let itemTotal = product.price * item.qty;
+    subtotal += itemTotal;
+
+    cartSection.innerHTML += `
+      <div class="col-12 mb-3">
+        <div class="card shadow-sm p-3 d-flex flex-row align-items-center">
+          <img src="${product.image}" class="img-thumbnail me-3" style="width: 100px; height:100px; object-fit:cover;">
+          <div class="flex-grow-1">
+            <h5>${product.name}</h5>
+            <p class="text-muted">${product.category}</p>
+            <p>₹${product.price} * ${item.qty} = <strong>₹${itemTotal}</strong></p>
+            <div class="d-flex align-items-center">
+              <button class="btn btn-outline-secondary btn-sm me-2" onclick="updateQuantity(${product.id}, -1)">-</button>
+              <span>${item.qty}</span>
+              <button class="btn btn-outline-secondary btn-sm ms-2" onclick="updateQuantity(${product.id}, 1)">+</button>
+              <button class="btn btn-danger btn-sm ms-3" onclick="removeFromCart(${product.id})">Remove</button>
             </div>
-          </div>
-          <!-- Subtotal & Remove -->
-          <div class="col-md-3 text-center">
-            <p class="fw-bold mt-3">₹${product.price * item.qty}</p>
-            <button class="btn btn-danger btn-sm" onclick="removeFromCart(${product.id})">Remove</button>
           </div>
         </div>
       </div>
     `;
-    })
-    .join("");
-
-  // Order Summary
-  let subtotal = cartList.reduce((sum, item) => {
-    let product = productList.find((p) => p.id === item.id);
-    return sum + (product ? product.price * item.qty : 0);
-  }, 0);
+  });
 
   let shipping = subtotal > 0 ? 99 : 0;
   let total = subtotal + shipping;
 
-  cartSection.innerHTML = `
-    <div class="container my-5">
-      <h2 class="mb-4 text-center">Your Cart</h2>
-      <div class="row">
-        <div class="col-md-8">
-          ${rows}
-        </div>
-        <div class="col-md-4">
-          <div class="card shadow-sm p-3">
-            <h5>Order Summary</h5>
-            <hr>
-            <p class="d-flex justify-content-between">
-              <span>Subtotal</span> <span>₹${subtotal}</span>
-            </p>
-            <p class="d-flex justify-content-between">
-              <span>Shipping</span> <span>₹${shipping}</span>
-            </p>
-            <p class="d-flex justify-content-between fw-bold">
-              <span>Total</span> <span>₹${total}</span>
-            </p>
-            <button class="btn btn-primary w-100">Proceed to Checkout</button>
-          </div>
-        </div>
-      </div>
+  subTotalSection.innerHTML = `
+    <div class="card shadow-sm p-3">
+      <h5>Order Summary</h5>
+      <hr>
+      <p class="d-flex justify-content-between"><span>Subtotal</span><span>₹${subtotal}</span></p>
+      <p class="d-flex justify-content-between"><span>Shipping</span><span>₹${shipping}</span></p>
+      <p class="d-flex justify-content-between fw-bold"><span>Total</span><span>₹${total}</span></p>
+      <button class="btn btn-primary w-100">Proceed to Checkout</button>
     </div>
   `;
 }
 
-// Update quantity (+/-)
 function updateQuantity(productId, change) {
-  let item = cartList.find((i) => i.id === productId);
+  let item = cartList.find(i => i.id === productId);
   if (!item) return;
 
   item.qty += change;
+
   if (item.qty <= 0) {
-    cartList = cartList.filter((i) => i.id !== productId);
+    cartList = cartList.filter(i => i.id !== productId);
   }
 
   localStorage.setItem("cartList", JSON.stringify(cartList));
   renderCart();
 }
 
-// Remove item completely
 function removeFromCart(productId) {
-  cartList = cartList.filter((i) => i.id !== productId);
+  cartList = cartList.filter(i => i.id !== productId);
   localStorage.setItem("cartList", JSON.stringify(cartList));
   renderCart();
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderItemTable(productList);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  showProduct(productList);               
+});
