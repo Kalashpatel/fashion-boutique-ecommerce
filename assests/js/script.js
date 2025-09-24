@@ -365,7 +365,8 @@ function addToCart(productId) {
 
     cartList.push({
       id: product.id,
-      qty: 1
+      qty: 1,
+      stock : product.stock
     });
   }
 
@@ -410,9 +411,9 @@ function renderCart() {
             <p class="text-muted">${product.category}</p>
             <p>₹${product.price} * ${item.qty} = <strong>₹${itemTotal}</strong></p>
             <div class="d-flex align-items-center">
-              <button class="btn btn-outline-secondary btn-sm me-2" onclick="updateQuantity(${product.id}, -1)">-</button>
+              <button class="btn btn-outline-secondary btn-sm me-2" onclick="updateQuantity(${product.id}, -1, ${product.stock})">-</button>
               <span>${item.qty}</span>
-              <button class="btn btn-outline-secondary btn-sm ms-2" onclick="updateQuantity(${product.id}, 1)">+</button>
+              <button class="btn btn-outline-secondary btn-sm ms-2" onclick="updateQuantity(${product.id}, 1, ${product.stock})">+</button>
               <button class="btn btn-danger btn-sm ms-3" onclick="removeFromCart(${product.id})">Remove</button>
             </div>
           </div>
@@ -431,16 +432,20 @@ function renderCart() {
       <p class="d-flex justify-content-between"><span>Subtotal</span><span>₹${subtotal}</span></p>
       <p class="d-flex justify-content-between"><span>Shipping</span><span>₹${shipping}</span></p>
       <p class="d-flex justify-content-between fw-bold"><span>Total</span><span>₹${total}</span></p>
-      <button class="btn btn-primary w-100">Proceed to Checkout</button>
+      <button class="btn btn-primary w-100" onclick="checkOut()">Proceed to Checkout</button>
     </div>
   `;
 }
 
-function updateQuantity(productId, change) {
+function updateQuantity(productId, change, stck) {
   let item = cartList.find(i => i.id === productId);
   if (!item) return;
 
-  item.qty += change;
+  if(item.qty <= stck){
+      item.qty += change;
+  }else{
+    alert("Stock limit reached!")
+  }
 
   if (item.qty <= 0) {
     cartList = cartList.filter(i => i.id !== productId);
@@ -454,6 +459,10 @@ function removeFromCart(productId) {
   cartList = cartList.filter(i => i.id !== productId);
   localStorage.setItem("cartList", JSON.stringify(cartList));
   renderCart();
+}
+
+function checkOut(){
+  alert("Your items will be delivered in 3-4 business days...Thank you..")
 }
 
 document.addEventListener("DOMContentLoaded", () => {
