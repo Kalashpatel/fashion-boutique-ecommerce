@@ -224,12 +224,60 @@ function showProduct(productList){
                 <p>${p.price} Rs.</p>
                 <div class="product-btn d-flex gap-2 w-100 justify-content-center">
                     <button class="cart-btn" onclick="addToCart(${p.id})">Add to Cart</button>
-                    <button class="view-btn" id="view-btn">View Product</button>
+                    <button class="view-btn" id="view-btn" onclick="viewProduct(${p.id})">View Product</button>
                 </div>
             </div>
         `
     });
 }
+
+function viewProduct(productID) {
+  let product = productList.find(p => p.id === productID);
+  if (!product) return;
+
+  document.getElementById("modalProductImage").src = product.image;
+  document.getElementById("modalProductName").textContent = product.name;
+  document.getElementById("modalProductDesc").textContent = product.description;
+  document.getElementById("modalProductPrice").textContent = product.price;
+  document.getElementById("modalProductStock").textContent = (product.stock && product.stock > 0) ? product.stock : "Out of stock";
+  console.log("Stock for product:", product.name, product.stock, typeof product.stock);
+
+  let modalAddToCartBtn = document.getElementById("modalAddToCart");
+  modalAddToCartBtn.onclick = function () {
+    addToCart(product.id);
+    let modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+    modal.hide(); 
+  };
+
+  let modal = new bootstrap.Modal(document.getElementById("productModal"));
+  modal.show();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  let searchForm = document.querySelector("form[role='search']");
+  let searchInput = document.getElementById("searchInput");
+
+  if (searchForm) {
+    searchForm.addEventListener("submit", function (e) {
+      e.preventDefault(); 
+
+      let query = searchInput.value.trim().toLowerCase();
+      if (!query) {
+        showProduct(productList);
+        return;
+      }
+
+      let filtered = productList.filter(p =>
+        p.name.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query)
+      );
+
+      showProduct(filtered); 
+    });
+  }
+});
+
 
 function addNewItem(){
   let itemName = document.getElementById("item-name").value.trim();
@@ -256,7 +304,7 @@ function addNewItem(){
     name : itemName,
     category,
     price: parseFloat(price),
-    stock: parseInt(stock),
+    stock: isNaN(stock) ? 0 : stock, 
     description: des,
     image
   }
