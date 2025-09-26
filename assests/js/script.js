@@ -217,12 +217,11 @@ function showProduct(productList){
         }
 
         section.innerHTML += `
-            <div class="col-3 product-card p-3 d-flex flex-column gap-2 text-center bg-primary bg-opacity-25 h-auto">
+            <div class="col-12 col-md-6 col-xl-3 product-card p-3 d-flex flex-column gap-2 text-center bg-primary bg-opacity-25 h-auto">
                 <img src="${p.image}" alt="product img" class="img-thumbnail w-100 h-50 object-fit-cover">
                 <h3>${p.name}</h3>
-                <p>${p.description}</p>
                 <p>${p.price} Rs.</p>
-                <div class="product-btn d-flex gap-2 w-100 justify-content-center">
+                <div class="product-btn d-flex flex-column flex-lg-row gap-2 w-100 justify-content-center">
                     <button class="cart-btn" onclick="addToCart(${p.id})">Add to Cart</button>
                     <button class="view-btn" id="view-btn" onclick="viewProduct(${p.id})">View Product</button>
                 </div>
@@ -314,6 +313,8 @@ function addNewItem(){
   renderItemTable(productList);
   showProduct(productList);
 
+  alert("Item added succesfully...")
+
   document.querySelector(".add-form form").reset();
 }
 
@@ -356,6 +357,8 @@ function deleteItem(id) {
   if (typeof showProduct === "function") {
     showProduct(productList);
   }
+
+  alert("item deleted succesfully.....");
 }
 
 function editItem(id) {
@@ -395,6 +398,7 @@ function updateItem(id) {
   }
 
   document.querySelector(".add-form form").reset();
+  alert("item edited succesfully.....");
   let btn = document.querySelector(".add-form button");
   btn.textContent = "Add Item";
   btn.onclick = addNewItem;

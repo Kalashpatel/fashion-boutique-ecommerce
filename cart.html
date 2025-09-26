@@ -26,11 +26,11 @@
         <div class="top-bar w-100 p-3 bg-primary text-white">
             <div class="container">
                 <div class="row justify-content-between">
-                    <div class="col-4">
+                    <div class="col-12 d-flex flex-column gap-1 flex-sm-row col-lg-5 col-xl-4">
                         <a href="mailto:info@boutique.com" class="text-white me-3"><i class="bi bi-envelope-fill me-1"></i>info@boutique.com</a>
                         <a href="tel:0000-123-456789" class="text-white"><i class="bi bi-telephone-fill me-1"></i>0000-123-456789</a>
                     </div>
-                    <div class="col-2">
+                    <div class="col-2 d-none d-lg-block">
                         <ul class="d-flex gap-3 m-0">
                             <li><a href="#" class="text-white"><i class="bi bi-instagram"></i></a></li>
                             <li><a href="#" class="text-white"><i class="bi bi-facebook"></i></a></li>
@@ -43,16 +43,19 @@
         </div>
         <nav class="navbar navbar-expand-lg mt-2 mb-2">
           <div class="container">
+
+            <a class="navbar-brand d-lg-none" href="index.html">
+                <img src="assests/images/logo/boutique-logo_300x300.webp" alt="logo">
+            </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" 
                     aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
-        
-            <!-- Navbar Content -->
+
             <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
-              <a class="navbar-brand" href="index.html">
+              <a class="navbar-brand d-none d-lg-block" href="index.html">
                 <img src="assests/images/logo/boutique-logo_300x300.webp" alt="logo">
               </a>
               <ul class="navbar-nav mb-2 mb-lg-0 d-flex gap-4">
@@ -61,9 +64,8 @@
                 <li class="nav-item"><a class="nav-link" href="cart.html">Cart</a></li>
               </ul>
           
-              <!-- Right: Search -->
               <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="searchInput"/>
                 <button class="btn btn-outline-success" type="submit">Search</button>
               </form>
             </div>
@@ -72,15 +74,15 @@
     </header>
 
     <main>
-        <section class="p-2 cart-section">
+        <section class="p-xl-2 cart-section">
           <div class="container">
             <div class="row">
-              <div class="col-8">
+              <div class="col-12 col-xl-8">
                 <div class="row" id="cart">
                   
                 </div>
               </div>
-              <div class="col-4" id="subTotal">
+              <div class="col-12 col-xl-4" id="subTotal">
 
               </div>
             </div>
